@@ -1,0 +1,11 @@
+{
+  "azureFunctions.deploySubpath": ".",
+  "azureFunctions.scmDoBuildDuringDeployment": true,
+  "azureFunctions.pythonVenv": ".venv",
+  "azureFunctions.projectLanguage": "Python",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.projectLanguageModel": 2,
+  "appService.defaultWebAppToDeploy": "/subscriptions/116d5dcd-78bb-4d74-b7ee-b77f0b810a6c/resourceGroups/appsvc_linux_canadacentral/providers/Microsoft.Web/sites/PredictionsApp1",
+  "appService.deploySubpath": "."
+}
