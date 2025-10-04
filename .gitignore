@@ -28,8 +28,6 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -54,16 +52,16 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# Django stuff
 *.log
 local_settings.py
 db.sqlite3
 
-# Flask stuff:
+# Flask stuff
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy stuff
 .scrapy
 
 # Sphinx documentation
@@ -83,11 +81,8 @@ ipython_config.py
 .python-version
 
 # pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don’t work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+# Pipfile.lock puede omitirse si no quieres forzar dependencias locales
+# Pipfile.lock
 
 # celery beat schedule file
 celerybeat-schedule
@@ -97,7 +92,7 @@ celerybeat-schedule
 
 # Environments
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -123,13 +118,13 @@ dmypy.json
 .pyre/
 
 # Azure Functions artifacts
-bin
-obj
+bin/
+obj/
 appsettings.json
 local.settings.json
 
 # Azurite artifacts
-__blobstorage__
-__queuestorage__
+__blobstorage__/
+__queuestorage__/
 __azurite_db*__.json
-.python_packages
+.python_packages/
