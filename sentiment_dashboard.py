@@ -5,8 +5,21 @@ import requests
 import pandas as pd
 from sentiment_utils import read_latest_blob, save_dataframe_to_blob
 from datetime import datetime
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
 
 app = func.FunctionApp()
+
+def authenticate_client():
+    """Autentica el cliente de Azure Cognitive Services"""
+    key = os.environ.get("AZURE_TEXT_KEY")
+    endpoint = os.environ.get("AZURE_TEXT_ENDPOINT")
+    if not key or not endpoint:
+        logging.error("Faltan variables de entorno de Azure Cognitive Services.")
+        return None
+    credential = AzureKeyCredential(key)
+    client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+    return client
 
 @app.timer_trigger(
     schedule="0 */5 * * * *",  # Cada 5 minutos
@@ -16,13 +29,15 @@ app = func.FunctionApp()
 )
 def timer_trigger(myTimer: func.TimerRequest) -> None:
     ACCESS_TOKEN = os.environ.get("FACEBOOK_ACCESS_TOKEN")
-    PAGE_ID = "100578801707401"
-    AZURE_TEXT_KEY = os.environ.get("AZURE_TEXT_KEY")
-    AZURE_TEXT_ENDPOINT = os.environ.get("AZURE_TEXT_ENDPOINT")
+    PAGE_ID = os.environ.get("META_PAGE_ID", "100578801707401")
     CONTAINER_NAME = os.environ.get("AZURE_CONTAINER_NAME", "datos-facebook")
 
-    if not all([ACCESS_TOKEN, AZURE_TEXT_KEY, AZURE_TEXT_ENDPOINT]):
-        logging.error("Faltan variables de entorno.")
+    if not ACCESS_TOKEN:
+        logging.error("Falta FACEBOOK_ACCESS_TOKEN en las variables de entorno.")
+        return
+
+    client = authenticate_client()
+    if client is None:
         return
 
     try:
@@ -41,25 +56,24 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
             logging.info("No se encontraron posts.")
             return
 
-        # Preparar documentos para análisis de sentimiento
-        documents = [
-            {"id": str(i), "text": post["message"]}
-            for i, post in enumerate(posts) if "message" in post
-        ]
+        # Filtrar posts con mensaje
+        documents = [post["message"] for post in posts if "message" in post]
 
-        # Llamada a Azure Cognitive Services (simulada)
-        # Aquí puedes reemplazar por tu función real de análisis de sentimiento
-        all_sentiment_data = [{"sentiment": "neutral"}] * len(documents)
+        if not documents:
+            logging.info("No hay mensajes para analizar.")
+            return
+
+        # Análisis de sentimiento real con Azure
+        sentiment_results = client.analyze_sentiment(documents)
 
         # Construir DataFrame final
-        results = [
-            {
+        results = []
+        for post, sentiment in zip(posts, sentiment_results):
+            results.append({
                 "Post": post.get("message", "N/A"),
                 "Likes": post.get("likes", {}).get("summary", {}).get("total_count", 0),
-                "Sentimiento": sentiment.get("sentiment", "N/A")
-            }
-            for post, sentiment in zip(posts, all_sentiment_data)
-        ]
+                "Sentimiento": sentiment.sentiment if sentiment else "N/A"
+            })
 
         df = pd.DataFrame(results)
         save_dataframe_to_blob(df, CONTAINER_NAME)
@@ -67,5 +81,6 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
 
     except Exception as e:
         logging.error(f"Error en timer trigger: {e}")
+
 
 
