@@ -337,6 +337,5 @@ def update_dashboard(_):
 # Ejecutar servidor
 # -----------------------------
 if __name__ == "__main__":
-    # usar app.run en vez de run_server (compatibilidad con versiones nuevas)
-    app.run(debug=True)
-
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host="0.0.0.0", port=port, debug=False)
